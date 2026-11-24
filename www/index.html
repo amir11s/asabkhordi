@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#0b7a75">
 <title>Amir Flow</title>
 <style>
+@font-face{font-family:Vazirmatn;src:url(fonts/Vazirmatn.woff2) format("woff2");font-weight:100 900;font-display:swap}
+[hidden]{display:none!important}
 :root{--bg:#eef3f6;--card:#fff;--tx:#10222b;--mut:#62767f;--line:#d9e3e8;--acc:#0b7a75;--acc2:#1d4ed8;--acc3:#7c3aed;--soft:#dff3f1;--warn:#b45309;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1519;--card:#162329;--tx:#e8f1f4;--mut:#93a8b0;--line:#26373e;--acc:#2dd4bf;--acc2:#60a5fa;--acc3:#a78bfa;--soft:#10312f;--warn:#fbbf24;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#0d1519;--card:#162329;--tx:#e8f1f4;--mut:#93a8b0;--line:#26373e;--acc:#2dd4bf;--acc2:#60a5fa;--acc3:#a78bfa;--soft:#10312f;--warn:#fbbf24;color-scheme:dark}
@@ -55,6 +57,34 @@ input[type=text],input[type=time]{font:inherit;width:100%;padding:10px 12px;bord
 .toast.end{background:var(--warn);color:#fff}
 .toast b{display:block}
 .toast button{font-size:20px;color:#fff}
+.hdr{display:flex;gap:8px;align-items:center}
+.seg{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:12px}
+.seg button{flex:1;padding:8px 0;border-radius:10px;font-size:14px;font-weight:600;color:var(--mut)}
+.seg button.on{background:var(--acc);color:#fff}
+.seg.sm{margin:0;padding:3px}.seg.sm button{padding:5px 12px;font-size:13px}
+.wr{display:block;width:100%;text-align:start;border-radius:14px;padding:8px 10px;margin-bottom:6px;background:var(--bg);border:2px solid transparent}
+.wr.today .wh b{color:var(--acc)}
+.wr.sel{border-color:var(--acc)}
+.wh{display:flex;justify-content:space-between;align-items:baseline;font-size:14px}
+.wh span{color:var(--mut);font-size:12.5px}
+.wi{margin-top:4px;display:grid;gap:4px}
+.wi em{color:var(--mut);font-style:normal;font-size:13px}
+.wc{display:flex;gap:6px;align-items:center;font-size:13px;border-inline-start:4px solid var(--acc);padding:2px 8px;background:var(--card);border-radius:8px}
+.wc.l60{border-color:var(--acc2)}.wc.l120{border-color:var(--acc3)}
+.wc.done{color:var(--mut);text-decoration:line-through}
+.wc small{color:var(--mut);flex:none}
+.wc span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stats{margin-top:14px}
+.sn{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin-bottom:12px}
+.sn div{background:var(--bg);border-radius:14px;padding:8px 4px}
+.sn b{display:block;font-size:17px}.sn span{font-size:12px;color:var(--mut)}
+.bars,.lbls{display:flex;gap:3px}
+.bars{height:84px;align-items:flex-end;margin-bottom:4px}
+.b{flex:1;height:100%;display:flex;align-items:flex-end}
+.bt{width:100%;background:var(--line);border-radius:4px;min-height:2px;display:flex;align-items:flex-end;overflow:hidden}
+.bd{width:100%;background:var(--acc)}
+.lbls span{flex:1;text-align:center;font-size:10.5px;color:var(--mut);min-height:14px}
+.sub{font-size:12.5px;color:var(--mut);text-align:center;margin-top:8px}
 </style>
 </head>
 <body>
@@ -62,9 +92,10 @@ input[type=text],input[type=time]{font:inherit;width:100%;padding:10px 12px;bord
 <div class="wrap">
 <header>
   <div class="logo">Amir <i>Flow</i></div>
-  <button class="bell" id="perm" hidden>فعال‌سازی اعلان</button>
+  <div class="hdr"><button class="bell" id="perm" hidden>فعال‌سازی اعلان</button><button class="bell" id="theme" aria-label="تغییر تم"></button></div>
 </header>
-<div class="card">
+<div class="seg" id="vsw"><button data-v="m" class="on">ماه</button><button data-v="w">هفته</button></div>
+<div class="card" id="mcard">
   <div class="mh">
     <button class="nav" id="next" aria-label="ماه بعد">›</button>
     <b id="title"></b>
@@ -72,6 +103,14 @@ input[type=text],input[type=time]{font:inherit;width:100%;padding:10px 12px;bord
   </div>
   <div class="grid" id="wds"></div>
   <div class="grid" id="days"></div>
+</div>
+<div class="card" id="wcard" hidden>
+  <div class="mh">
+    <button class="nav" id="wnext" aria-label="هفته بعد">›</button>
+    <b id="wtitle"></b>
+    <button class="nav" id="wprev" aria-label="هفته قبل">‹</button>
+  </div>
+  <div id="wlist"></div>
 </div>
 <div class="day card" id="panel">
   <h2><span id="dt"></span><small id="cnt"></small></h2>
@@ -88,6 +127,10 @@ input[type=text],input[type=time]{font:inherit;width:100%;padding:10px 12px;bord
     <button class="go" id="addb">افزودن به برنامه</button>
   </div>
   <div id="list"></div>
+</div>
+<div class="card stats">
+  <div class="mh"><b>آمار</b><div class="seg sm" id="ssw"><button data-s="w" class="on">هفته</button><button data-s="m">ماه</button></div></div>
+  <div id="sbody"></div>
 </div>
 </div>
 <script>
@@ -114,8 +157,18 @@ function sched(it,k){
   if(a.length)LN.schedule({notifications:a}).catch(function(){});
 }
 function unsched(it){if(LN&&it.nid)LN.cancel({notifications:[{id:it.nid},{id:it.nid+1}]}).catch(function(){})}
-var T=tod(),cy=T[0],cm=T[1],sel=T.slice(),dur=30;
+var T=tod(),cy=T[0],cm=T[1],sel=T.slice(),dur=30,view='m',smode='w';
 var $=function(i){return document.getElementById(i)};
+var root=document.documentElement;
+function isDark(){var t=root.getAttribute('data-theme');if(t)return t==='dark';return !!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
+function paintTheme(){$('theme').textContent=isDark()?'☀️':'🌙';var mt=document.querySelector('meta[name=theme-color]');if(mt)mt.setAttribute('content',isDark()?'#0d1519':'#0b7a75')}
+try{var sv=localStorage.getItem('amirflow-theme');if(sv)root.setAttribute('data-theme',sv)}catch(e){}
+$('theme').onclick=function(){var n=isDark()?'light':'dark';root.setAttribute('data-theme',n);try{localStorage.setItem('amirflow-theme',n)}catch(e){}paintTheme()};
+paintTheme();
+function addDays(y,m,d,n){var g=toG(y,m,d),dt=new Date(g[0],g[1]-1,g[2]+n);return toJ(dt.getFullYear(),dt.getMonth()+1,dt.getDate())}
+function wdOf(y,m,d){var g=toG(y,m,d);return (new Date(g[0],g[1]-1,g[2]).getDay()+1)%7}
+function weekStart(){return addDays(sel[0],sel[1],sel[2],-wdOf(sel[0],sel[1],sel[2]))}
+function sortedAt(k){return (store[k]||[]).slice().sort(function(x,y){return x.start<y.start?-1:1})}
 var now=new Date();$('tm').value=('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2);
 $('wds').innerHTML=WN.map(function(w){return '<div class="wd">'+w.charAt(0)+'</div>'}).join('');
 function fmtDur(m){return m<60?fa(m)+' دقیقه':fa(m/60)+' ساعت'}
@@ -146,9 +199,69 @@ function lst(){
   var bs=$('list').querySelectorAll('.item .t b');
   a.forEach(function(it,i){bs[i].textContent=it.title});
 }
-function draw(){cal();lst()}
-$('prev').onclick=function(){cm--;if(cm<1){cm=12;cy--}cal()};
-$('next').onclick=function(){cm++;if(cm>12){cm=1;cy++}cal()};
+function fmtH(m){if(!m)return fa(0);if(m<60)return fa(m)+' دقیقه';var h=Math.floor(m/60),r=m%60;return fa(h)+' ساعت'+(r?' و '+fa(r)+' دقیقه':'')}
+function wk(){
+  if(view!=='w')return;
+  var ws=weekStart(),we=addDays(ws[0],ws[1],ws[2],6);
+  $('wtitle').textContent=(ws[1]===we[1]?fa(ws[2])+' تا '+fa(we[2])+' '+MN[we[1]-1]:fa(ws[2])+' '+MN[ws[1]-1]+' تا '+fa(we[2])+' '+MN[we[1]-1])+' '+fa(we[0]);
+  var box=$('wlist');box.textContent='';
+  for(var i=0;i<7;i++){
+    var d=addDays(ws[0],ws[1],ws[2],i),k=key(d[0],d[1],d[2]),a=sortedAt(k);
+    var r=document.createElement('div');r.className='wr'+(d[0]===sel[0]&&d[1]===sel[1]&&d[2]===sel[2]?' sel':'')+(d[0]===T[0]&&d[1]===T[1]&&d[2]===T[2]?' today':'');
+    r.setAttribute('role','button');r.dataset.i=i;
+    var h=document.createElement('div');h.className='wh';
+    var b=document.createElement('b'),sp=document.createElement('span');b.textContent=WN[i];sp.textContent=fa(d[2])+' '+MN[d[1]-1];
+    h.appendChild(b);h.appendChild(sp);r.appendChild(h);
+    var w=document.createElement('div');w.className='wi';
+    if(!a.length){var em=document.createElement('em');em.textContent='بدون برنامه';w.appendChild(em)}
+    a.forEach(function(it){
+      var c=document.createElement('div');c.className='wc l'+it.dur+(it.done?' done':'');
+      var sm=document.createElement('small'),t=document.createElement('span');
+      sm.textContent=fa(it.start);t.textContent=it.title;c.appendChild(sm);c.appendChild(t);w.appendChild(c);
+    });
+    r.appendChild(w);box.appendChild(r);
+  }
+}
+function stat(){
+  var keys=[],labels=[],title;
+  if(smode==='w'){
+    var ws=weekStart();
+    for(var i=0;i<7;i++){var d=addDays(ws[0],ws[1],ws[2],i);keys.push(key(d[0],d[1],d[2]));labels.push(WN[i].charAt(0))}
+    title='هفته‌ی '+fa(ws[2])+' '+MN[ws[1]-1];
+  }else{
+    var n=dim(cy,cm);
+    for(var j=1;j<=n;j++){keys.push(key(cy,cm,j));labels.push(j===1||j%5===0?fa(j):'')}
+    title=MN[cm-1]+' '+fa(cy);
+  }
+  var cnt=0,done=0,tot=0,dm=0,per=[];
+  keys.forEach(function(k){
+    var a=store[k]||[],t=0,x=0;
+    a.forEach(function(it){cnt++;t+=it.dur;if(it.done){done++;x+=it.dur}});
+    tot+=t;dm+=x;per.push([t,x]);
+  });
+  var mx=0;per.forEach(function(p){if(p[0]>mx)mx=p[0]});
+  var pct=cnt?Math.round(done/cnt*100):0;
+  var h='<div class="sn"><div><b>'+fa(cnt)+'</b><span>برنامه</span></div><div><b>'+fmtH(tot)+'</b><span>زمان برنامه‌ریزی</span></div><div><b>'+fa(pct)+'٪</b><span>انجام‌شده</span></div></div>';
+  h+='<div class="bars">'+per.map(function(p){var ht=mx?Math.max(p[0]/mx*100,p[0]?6:0):0,dh=p[0]?p[1]/p[0]*100:0;return '<div class="b"><div class="bt" style="height:'+ht+'%"><div class="bd" style="height:'+dh+'%"></div></div></div>'}).join('')+'</div>';
+  h+='<div class="lbls">'+labels.map(function(l){return '<span>'+l+'</span>'}).join('')+'</div>';
+  h+='<div class="sub">'+title+' · '+fa(done)+' از '+fa(cnt)+' برنامه انجام شد'+(dm?' · '+fmtH(dm)+' زمان انجام‌شده':'')+'</div>';
+  $('sbody').innerHTML=h;
+}
+function draw(){cal();wk();lst();stat()}
+function setView(v){
+  view=v;cy=sel[0];cm=sel[1];
+  $('mcard').hidden=v!=='m';$('wcard').hidden=v!=='w';
+  [].forEach.call($('vsw').children,function(c){c.classList.toggle('on',c.dataset.v===v)});
+  draw();
+}
+$('vsw').onclick=function(e){var b=e.target.closest('button');if(b)setView(b.dataset.v)};
+$('ssw').onclick=function(e){var b=e.target.closest('button');if(!b)return;smode=b.dataset.s;[].forEach.call(this.children,function(c){c.classList.toggle('on',c===b)});stat()};
+function shiftWeek(n){sel=addDays(sel[0],sel[1],sel[2],n);cy=sel[0];cm=sel[1];draw()}
+$('wnext').onclick=function(){shiftWeek(7)};
+$('wprev').onclick=function(){shiftWeek(-7)};
+$('wlist').onclick=function(e){var r=e.target.closest('.wr');if(!r)return;var d=addDays(weekStart()[0],weekStart()[1],weekStart()[2],+r.dataset.i);sel=d;cy=d[0];cm=d[1];draw();$('panel').scrollIntoView({behavior:'smooth',block:'start'})};
+$('prev').onclick=function(){cm--;if(cm<1){cm=12;cy--}cal();stat()};
+$('next').onclick=function(){cm++;if(cm>12){cm=1;cy++}cal();stat()};
 $('days').onclick=function(e){var b=e.target.closest('.d');if(!b)return;sel=[cy,cm,+b.dataset.d];draw()};
 $('chips').onclick=function(e){var b=e.target.closest('.chip');if(!b)return;dur=+b.dataset.m;[].forEach.call(this.children,function(c){c.classList.toggle('on',c===b)})};
 $('addb').onclick=function(){
