@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b7a75">
+<title>Amir Flow</title>
+<style>
+:root{--bg:#eef3f6;--card:#fff;--tx:#10222b;--mut:#62767f;--line:#d9e3e8;--acc:#0b7a75;--acc2:#1d4ed8;--acc3:#7c3aed;--soft:#dff3f1;--warn:#b45309;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1519;--card:#162329;--tx:#e8f1f4;--mut:#93a8b0;--line:#26373e;--acc:#2dd4bf;--acc2:#60a5fa;--acc3:#a78bfa;--soft:#10312f;--warn:#fbbf24;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d1519;--card:#162329;--tx:#e8f1f4;--mut:#93a8b0;--line:#26373e;--acc:#2dd4bf;--acc2:#60a5fa;--acc3:#a78bfa;--soft:#10312f;--warn:#fbbf24;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Vazirmatn,Tahoma,sans-serif;line-height:1.6}
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 40px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.logo{font-weight:800;font-size:24px;letter-spacing:-.5px;direction:ltr}
+.logo i{font-style:normal;color:var(--acc)}
+button{font:inherit;cursor:pointer;border:0;color:inherit;background:none}
+.bell{background:var(--soft);color:var(--acc);padding:6px 12px;border-radius:99px;font-size:13px;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px}
+.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mh b{font-size:18px}
+.nav{width:38px;height:38px;border-radius:12px;background:var(--bg);font-size:18px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.wd{font-size:12px;color:var(--mut);padding:4px 0}
+.d{position:relative;aspect-ratio:1;border-radius:12px;font-size:15px;display:flex;align-items:center;justify-content:center;background:transparent}
+.d.fri{color:#dc2626}
+.d.today{outline:2px solid var(--acc);outline-offset:-2px}
+.d.sel{background:var(--acc);color:#fff;font-weight:700}
+.d .dot{position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--acc2)}
+.d.sel .dot{background:#fff}
+.day{margin-top:14px}
+.day h2{font-size:17px;margin:0 2px 8px;display:flex;justify-content:space-between;align-items:baseline}
+.day h2 small{font-weight:400;color:var(--mut);font-size:13px}
+.add{display:grid;gap:8px;margin-bottom:12px}
+input[type=text],input[type=time]{font:inherit;width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--tx)}
+.row{display:flex;gap:8px}
+.chips{display:flex;gap:6px;flex:1}
+.chip{flex:1;padding:9px 0;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-size:13px;font-weight:600}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.go{background:var(--acc);color:#fff;font-weight:800;padding:11px;border-radius:12px}
+.item{display:flex;gap:10px;align-items:center;background:var(--bg);border-radius:14px;padding:10px 12px;margin-bottom:8px;border-inline-start:5px solid var(--acc)}
+.item.l60{border-color:var(--acc2)}.item.l120{border-color:var(--acc3)}
+.item .t{flex:1;min-width:0}
+.item .t b{display:block;overflow-wrap:anywhere}
+.item .t span{font-size:12.5px;color:var(--mut)}
+.item.done b{text-decoration:line-through;color:var(--mut)}
+.ck{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);flex:none;font-size:14px;color:#fff}
+.item.done .ck{background:var(--acc);border-color:var(--acc)}
+.x{color:var(--mut);font-size:20px;padding:0 4px}
+.empty{color:var(--mut);text-align:center;padding:14px 0;font-size:14px}
+#toasts{position:fixed;inset:0 0 auto 0;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 0;z-index:20;pointer-events:none;display:grid;gap:8px;max-width:560px;margin:0 auto}
+.toast{pointer-events:auto;background:var(--acc);color:#fff;border-radius:14px;padding:12px 14px;display:flex;gap:10px;justify-content:space-between;align-items:center;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.toast.end{background:var(--warn);color:#fff}
+.toast b{display:block}
+.toast button{font-size:20px;color:#fff}
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+<div class="wrap">
+<header>
+  <div class="logo">Amir <i>Flow</i></div>
+  <button class="bell" id="perm" hidden>فعال‌سازی اعلان</button>
+</header>
+<div class="card">
+  <div class="mh">
+    <button class="nav" id="next" aria-label="ماه بعد">›</button>
+    <b id="title"></b>
+    <button class="nav" id="prev" aria-label="ماه قبل">‹</button>
+  </div>
+  <div class="grid" id="wds"></div>
+  <div class="grid" id="days"></div>
+</div>
+<div class="day card" id="panel">
+  <h2><span id="dt"></span><small id="cnt"></small></h2>
+  <div class="add">
+    <input type="text" id="ti" placeholder="چه کاری برنامه داری؟" maxlength="80">
+    <div class="row">
+      <input type="time" id="tm" style="max-width:130px">
+      <div class="chips" id="chips">
+        <button class="chip on" data-m="30">۳۰ دقیقه</button>
+        <button class="chip" data-m="60">۱ ساعت</button>
+        <button class="chip" data-m="120">۲ ساعت</button>
+      </div>
+    </div>
+    <button class="go" id="addb">افزودن به برنامه</button>
+  </div>
+  <div id="list"></div>
+</div>
+</div>
+<script>
+(function(){
+var MN=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+var WN=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'];
+function fa(n){return String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d]})}
+function toJ(gy,gm,gd){var g=[0,31,59,90,120,151,181,212,243,273,304,334];var y2=gm>2?gy+1:gy;var days=355666+365*gy+Math.floor((y2+3)/4)-Math.floor((y2+99)/100)+Math.floor((y2+399)/400)+gd+g[gm-1];var jy=-1595+33*Math.floor(days/12053);days%=12053;jy+=4*Math.floor(days/1461);days%=1461;if(days>365){jy+=Math.floor((days-1)/365);days=(days-1)%365}var jm=days<186?1+Math.floor(days/31):7+Math.floor((days-186)/30);var jd=1+(days<186?days%31:(days-186)%30);return[jy,jm,jd]}
+function toG(jy,jm,jd){jy+=1595;var days=-355668+365*jy+Math.floor(jy/33)*8+Math.floor((jy%33+3)/4)+jd+(jm<7?(jm-1)*31:(jm-7)*30+186);var gy=400*Math.floor(days/146097);days%=146097;if(days>36524){gy+=100*Math.floor(--days/36524);days%=36524;if(days>=365)days++}gy+=4*Math.floor(days/1461);days%=1461;if(days>365){gy+=Math.floor((days-1)/365);days=(days-1)%365}var gd=days+1;var s=[0,31,(gy%4==0&&gy%100!=0)||gy%400==0?29:28,31,30,31,30,31,31,30,31,30,31];var gm;for(gm=0;gm<13&&gd>s[gm];gm++)gd-=s[gm];return[gy,gm,gd]}
+function dim(y,m){if(m<=6)return 31;if(m<=11)return 30;var g=toG(y,12,30),j=toJ(g[0],g[1],g[2]);return j[1]===12&&j[2]===30?30:29}
+function key(y,m,d){return y+'-'+(m<10?'0':'')+m+'-'+(d<10?'0':'')+d}
+function tod(){var n=new Date();return toJ(n.getFullYear(),n.getMonth()+1,n.getDate())}
+var store={};
+try{store=JSON.parse(localStorage.getItem('amirflow')||'{}')}catch(e){}
+function save(){try{localStorage.setItem('amirflow',JSON.stringify(store))}catch(e){}}
+var LN=(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications)||null;
+var lastN=0;function newNid(){var b=Math.floor(Date.now()/1000)%1000000000;if(b<=lastN)b=lastN+1;lastN=b;return b*2}
+function sched(it,k){
+  if(!LN||!it.nid)return;
+  var kp=k.split('-'),g=toG(+kp[0],+kp[1],+kp[2]),p=it.start.split(':');
+  var st=new Date(g[0],g[1]-1,g[2],+p[0],+p[1]).getTime(),en=st+it.dur*60000,n=Date.now(),a=[];
+  if(st>n)a.push({id:it.nid,title:'شروع شد: '+it.title,body:'مدت: '+fmtDur(it.dur),schedule:{at:new Date(st),allowWhileIdle:true}});
+  if(en>n)a.push({id:it.nid+1,title:'تمام شد: '+it.title,body:'وقت استراحت یا کار بعدی است',schedule:{at:new Date(en),allowWhileIdle:true}});
+  if(a.length)LN.schedule({notifications:a}).catch(function(){});
+}
+function unsched(it){if(LN&&it.nid)LN.cancel({notifications:[{id:it.nid},{id:it.nid+1}]}).catch(function(){})}
+var T=tod(),cy=T[0],cm=T[1],sel=T.slice(),dur=30;
+var $=function(i){return document.getElementById(i)};
+var now=new Date();$('tm').value=('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2);
+$('wds').innerHTML=WN.map(function(w){return '<div class="wd">'+w.charAt(0)+'</div>'}).join('');
+function fmtDur(m){return m<60?fa(m)+' دقیقه':fa(m/60)+' ساعت'}
+function endStr(st,m){var p=st.split(':'),t=(+p[0])*60+(+p[1])+m;t%=1440;return ('0'+Math.floor(t/60)).slice(-2)+':'+('0'+t%60).slice(-2)}
+function fmtT(s){return fa(s)}
+function cal(){
+  $('title').textContent=MN[cm-1]+' '+fa(cy);
+  var g=toG(cy,cm,1),wd=(new Date(g[0],g[1]-1,g[2]).getDay()+1)%7,n=dim(cy,cm),h='';
+  for(var i=0;i<wd;i++)h+='<div></div>';
+  for(var d=1;d<=n;d++){
+    var k=key(cy,cm,d),c='d',col=(wd+d-1)%7===6;
+    if(col)c+=' fri';
+    if(cy===T[0]&&cm===T[1]&&d===T[2])c+=' today';
+    if(cy===sel[0]&&cm===sel[1]&&d===sel[2])c+=' sel';
+    h+='<button class="'+c+'" data-d="'+d+'">'+fa(d)+((store[k]&&store[k].length)?'<span class="dot"></span>':'')+'</button>';
+  }
+  $('days').innerHTML=h;
+}
+function lst(){
+  var k=key(sel[0],sel[1],sel[2]),a=(store[k]||[]).slice().sort(function(x,y){return x.start<y.start?-1:1});
+  var g=toG(sel[0],sel[1],sel[2]),w=(new Date(g[0],g[1]-1,g[2]).getDay()+1)%7;
+  $('dt').textContent=WN[w]+' '+fa(sel[2])+' '+MN[sel[1]-1];
+  $('cnt').textContent=a.length?fa(a.length)+' برنامه':'';
+  if(!a.length){$('list').innerHTML='<div class="empty">برای این روز هنوز برنامه‌ای نداری. یکی اضافه کن.</div>';return}
+  $('list').innerHTML=a.map(function(it){
+    return '<div class="item l'+it.dur+(it.done?' done':'')+'"><button class="ck" data-ck="'+it.id+'">'+(it.done?'✓':'')+'</button><div class="t"><b></b><span>'+fa(it.start)+' تا '+fa(endStr(it.start,it.dur))+' · '+fmtDur(it.dur)+'</span></div><button class="x" data-rm="'+it.id+'" aria-label="حذف">×</button></div>';
+  }).join('');
+  var bs=$('list').querySelectorAll('.item .t b');
+  a.forEach(function(it,i){bs[i].textContent=it.title});
+}
+function draw(){cal();lst()}
+$('prev').onclick=function(){cm--;if(cm<1){cm=12;cy--}cal()};
+$('next').onclick=function(){cm++;if(cm>12){cm=1;cy++}cal()};
+$('days').onclick=function(e){var b=e.target.closest('.d');if(!b)return;sel=[cy,cm,+b.dataset.d];draw()};
+$('chips').onclick=function(e){var b=e.target.closest('.chip');if(!b)return;dur=+b.dataset.m;[].forEach.call(this.children,function(c){c.classList.toggle('on',c===b)})};
+$('addb').onclick=function(){
+  var t=$('ti').value.trim();if(!t){$('ti').focus();return}
+  var tm=$('tm').value;if(!tm){$('tm').focus();return}
+  var k=key(sel[0],sel[1],sel[2]);var it={id:Date.now()+''+Math.floor(Math.random()*99),nid:newNid(),title:t,start:tm,dur:dur,done:false,ns:false,ne:false};(store[k]=store[k]||[]).push(it);sched(it,k);
+  save();$('ti').value='';draw();askPerm();
+};
+$('ti').onkeydown=function(e){if(e.key==='Enter')$('addb').click()};
+$('list').onclick=function(e){
+  var k=key(sel[0],sel[1],sel[2]),a=store[k]||[],c=e.target.closest('[data-ck]'),r=e.target.closest('[data-rm]');
+  if(c){a.forEach(function(i){if(i.id===c.dataset.ck){i.done=!i.done;if(i.done)unsched(i);else sched(i,k)}})}
+  if(r){a.forEach(function(i){if(i.id===r.dataset.rm)unsched(i)});store[k]=a.filter(function(i){return i.id!==r.dataset.rm})}
+  save();draw();
+};
+function toast(title,body,end){
+  var d=document.createElement('div');d.className='toast'+(end?' end':'');
+  var s=document.createElement('div'),b=document.createElement('b'),p=document.createElement('span'),x=document.createElement('button');
+  b.textContent=title;p.textContent=body;x.textContent='×';x.onclick=function(){d.remove()};
+  s.appendChild(b);s.appendChild(p);d.appendChild(s);d.appendChild(x);$('toasts').appendChild(d);
+}
+function beep(){try{var C=window.AudioContext||window.webkitAudioContext,c=new C(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.15;o.start();setTimeout(function(){o.stop();c.close()},350)}catch(e){}}
+function notify(title,body,end){
+  try{if('Notification' in window&&Notification.permission==='granted')new Notification(title,{body:body})}catch(e){}
+  toast(title,body,end);beep();
+  try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
+}
+function askPerm(){if(LN){LN.checkPermissions().then(function(r){if(r.display!=='granted')$('perm').hidden=false}).catch(function(){});return}try{if('Notification' in window&&Notification.permission==='default')$('perm').hidden=false}catch(e){}}
+$('perm').onclick=function(){if(LN){LN.requestPermissions().then(function(){$('perm').hidden=true}).catch(function(){});return}try{Notification.requestPermission().then(function(){$('perm').hidden=true})}catch(e){}};
+askPerm();
+function tick(){
+  if(LN)return;
+  var n=new Date(),tj=toJ(n.getFullYear(),n.getMonth()+1,n.getDate()),k=key(tj[0],tj[1],tj[2]),a=store[k]||[],ch=false;
+  a.forEach(function(it){
+    if(it.done)return;
+    var p=it.start.split(':'),st=new Date(n.getFullYear(),n.getMonth(),n.getDate(),+p[0],+p[1]).getTime(),en=st+it.dur*60000,t=n.getTime();
+    if(!it.ns&&t>=st&&t<en){it.ns=true;ch=true;notify('شروع شد: '+it.title,'مدت: '+fmtDur(it.dur),false)}
+    if(!it.ne&&t>=en&&t<en+600000){it.ne=true;it.ns=true;ch=true;notify('تمام شد: '+it.title,'وقت استراحت یا کار بعدی است',true)}
+  });
+  if(ch){save();lst()}
+}
+setInterval(tick,10000);tick();
+document.addEventListener('visibilitychange',function(){if(!document.hidden){T=tod();tick();draw()}});
+draw();
+})();
+</script>
+</body>
+</html>
