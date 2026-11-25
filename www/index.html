@@ -85,15 +85,45 @@ input[type=text],input[type=time]{font:inherit;width:100%;padding:10px 12px;bord
 .bd{width:100%;background:var(--acc)}
 .lbls span{flex:1;text-align:center;font-size:10.5px;color:var(--mut);min-height:14px}
 .sub{font-size:12.5px;color:var(--mut);text-align:center;margin-top:8px}
+.menub{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:20px;line-height:1}
+.hl{display:flex;align-items:center;gap:10px}
+#ovl{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30}
+#drawer{position:fixed;top:0;bottom:0;right:0;width:min(78vw,300px);background:var(--card);z-index:31;transform:translateX(100%);transition:transform .22s,visibility .22s;padding:calc(env(safe-area-inset-top,0px) + 16px) 12px 16px;box-shadow:-8px 0 30px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:6px}
+#drawer:not(.open){visibility:hidden}
+#drawer.open{transform:none}
+.dh{font-weight:800;font-size:18px;margin:4px 6px 10px}
+.mi{display:block;width:100%;text-align:start;padding:12px 14px;border-radius:14px;font-size:15px;font-weight:600}
+.mi.on{background:var(--soft);color:var(--acc)}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.pill{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.pill.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.pill button{padding:8px 12px;font-weight:600;font-size:14px}
+.pill .px{padding:8px 10px 8px 4px;font-size:18px;opacity:.7}
+.cnt2{margin-top:14px}
+.dnav{display:flex;align-items:center;justify-content:space-between;margin:6px 0 10px}
+.dnav b{font-size:16px;text-align:center}
+.dnav small{display:block;font-weight:400;color:var(--mut);font-size:12.5px}
+.sl{display:flex;gap:10px;align-items:center;background:var(--bg);border-radius:14px;padding:8px 10px;margin-bottom:8px;border-inline-start:5px solid var(--line)}
+.sl.f{border-color:var(--acc)}.sl.f.l2{border-color:var(--acc3)}
+.sl .tm{flex:none;width:92px;font-size:12.5px;color:var(--mut);line-height:1.4}
+.sl .tm b{display:block;color:var(--tx);font-size:13.5px}
+.sl input{background:var(--card)}
 </style>
 </head>
 <body>
 <div id="toasts"></div>
+<div id="ovl" hidden></div>
+<nav id="drawer" aria-label="منو">
+  <div class="dh">منو</div>
+  <button class="mi on" data-p="home">🗓️ برنامه‌ی من</button>
+  <button class="mi" data-p="cn">🎓 مشاور تحصیلی</button>
+</nav>
 <div class="wrap">
 <header>
-  <div class="logo">Amir <i>Flow</i></div>
+  <div class="hl"><button class="menub" id="menub" aria-label="منو">☰</button><div class="logo">Amir <i>Flow</i></div></div>
   <div class="hdr"><button class="bell" id="perm" hidden>فعال‌سازی اعلان</button><button class="bell" id="theme" aria-label="تغییر تم"></button></div>
 </header>
+<div id="home">
 <div class="seg" id="vsw"><button data-v="m" class="on">ماه</button><button data-v="w">هفته</button></div>
 <div class="card" id="mcard">
   <div class="mh">
@@ -131,6 +161,24 @@ input[type=text],input[type=time]{font:inherit;width:100%;padding:10px 12px;bord
 <div class="card stats">
   <div class="mh"><b>آمار</b><div class="seg sm" id="ssw"><button data-s="w" class="on">هفته</button><button data-s="m">ماه</button></div></div>
   <div id="sbody"></div>
+</div>
+</div>
+<div id="cn" hidden>
+  <div class="card">
+    <div class="mh"><b>دانش‌آموزان من</b><small id="cnc" style="color:var(--mut)"></small></div>
+    <div class="row"><input type="text" id="sn" placeholder="نام دانش‌آموز" maxlength="40"><button class="go" id="sadd" style="padding:0 18px;flex:none">افزودن</button></div>
+    <div class="pills" id="slist"></div>
+  </div>
+  <div class="card cnt2" id="splan" hidden>
+    <div class="mh"><b id="spn"></b></div>
+    <div class="dnav">
+      <button class="nav" id="dnext" aria-label="روز بعد">›</button>
+      <b id="dtt"></b>
+      <button class="nav" id="dprev" aria-label="روز قبل">‹</button>
+    </div>
+    <div class="seg" id="zsw"><button data-z="1" class="on">بازه‌ی ۱ ساعته</button><button data-z="2">بازه‌ی ۲ ساعته</button></div>
+    <div id="sgrid"></div>
+  </div>
 </div>
 </div>
 <script>
@@ -305,6 +353,95 @@ function tick(){
 }
 setInterval(tick,10000);tick();
 document.addEventListener('visibilitychange',function(){if(!document.hidden){T=tod();tick();draw()}});
+/* ---- منو و مشاور تحصیلی ---- */
+var CN={students:[],plans:{}},cnSel=null,cnDay=T.slice(),cnSize=1;
+try{var cj=JSON.parse(localStorage.getItem('amirflow-cn')||'null');if(cj&&cj.students&&cj.plans)CN=cj}catch(e){}
+if(CN.students.length)cnSel=CN.students[0].id;
+function cnSave(){try{localStorage.setItem('amirflow-cn',JSON.stringify(CN))}catch(e){}}
+function openMenu(o){$('drawer').classList.toggle('open',o);$('ovl').hidden=!o}
+$('menub').onclick=function(){openMenu(true)};
+$('ovl').onclick=function(){openMenu(false)};
+function showPage(p){
+  $('home').hidden=p!=='home';$('cn').hidden=p!=='cn';
+  [].forEach.call($('drawer').querySelectorAll('.mi'),function(b){b.classList.toggle('on',b.dataset.p===p)});
+  openMenu(false);window.scrollTo(0,0);
+  if(p==='cn')cnDraw();
+}
+$('drawer').onclick=function(e){var b=e.target.closest('.mi');if(b)showPage(b.dataset.p)};
+function pad2(n){return (n<10?'0':'')+n}
+function cnItems(sid,k){return ((CN.plans[sid]||{})[k])||[]}
+function cnRows(items){
+  var rows=[],h=8,m={};
+  items.forEach(function(it){m[it.s]=it});
+  while(h<24){
+    if(m[h]){var d=Math.max(1,Math.min(m[h].d,24-h));rows.push({s:h,d:d,it:m[h]});h+=d;continue}
+    var lim=Math.min(cnSize,24-h);
+    for(var x=h+1;x<h+lim;x++){if(m[x]){lim=x-h;break}}
+    rows.push({s:h,d:lim,it:null});h+=lim;
+  }
+  return rows;
+}
+function rowSig(rows){return rows.map(function(r){return r.s+':'+r.d+(r.it?'f':'')}).join(',')}
+function cnStu(){
+  var box=$('slist');box.textContent='';
+  $('cnc').textContent=CN.students.length?fa(CN.students.length)+' نفر':'';
+  if(!CN.students.length){var e=document.createElement('div');e.className='empty';e.style.width='100%';e.textContent='هنوز دانش‌آموزی اضافه نکرده‌اید.';box.appendChild(e);return}
+  CN.students.forEach(function(st){
+    var p=document.createElement('div');p.className='pill'+(st.id===cnSel?' on':'');
+    var b=document.createElement('button'),x=document.createElement('button');
+    b.textContent=st.name;x.textContent='×';x.className='px';x.setAttribute('aria-label','حذف');
+    b.onclick=function(){cnSel=st.id;cnDraw()};
+    x.onclick=function(){
+      if(!confirm('«'+st.name+'» و همه‌ی برنامه‌هایش حذف شود؟'))return;
+      CN.students=CN.students.filter(function(q){return q.id!==st.id});delete CN.plans[st.id];
+      if(cnSel===st.id)cnSel=CN.students.length?CN.students[0].id:null;
+      cnSave();cnDraw();
+    };
+    p.appendChild(b);p.appendChild(x);box.appendChild(p);
+  });
+}
+function cnGrid(){
+  var st=CN.students.filter(function(q){return q.id===cnSel})[0];
+  $('splan').hidden=!st;
+  if(!st)return;
+  $('spn').textContent='برنامه‌ی '+st.name;
+  var w=wdOf(cnDay[0],cnDay[1],cnDay[2]);
+  var isT=cnDay[0]===T[0]&&cnDay[1]===T[1]&&cnDay[2]===T[2];
+  $('dtt').innerHTML='<span></span><small></small>';
+  $('dtt').firstChild.textContent=WN[w]+' '+fa(cnDay[2])+' '+MN[cnDay[1]-1];
+  $('dtt').lastChild.textContent=fa(cnDay[0])+(isT?' · امروز':'');
+  var k=key(cnDay[0],cnDay[1],cnDay[2]),sid=st.id,rows=cnRows(cnItems(sid,k)),box=$('sgrid');
+  box.textContent='';
+  rows.forEach(function(r){
+    var d=document.createElement('div');d.className='sl'+(r.it?' f':'')+(r.d>=2?' l2':'');
+    var tm=document.createElement('div');tm.className='tm';
+    var b=document.createElement('b');b.textContent=fa(pad2(r.s))+':۰۰ تا '+fa(pad2(r.s+r.d))+':۰۰';
+    var sp=document.createElement('span');sp.textContent=fmtDur(r.d*60);
+    tm.appendChild(b);tm.appendChild(sp);
+    var inp=document.createElement('input');inp.type='text';inp.maxLength=120;inp.placeholder='درس یا برنامه';inp.value=r.it?r.it.t:'';
+    inp.onchange=function(){
+      var t=inp.value.trim(),before=rowSig(cnRows(cnItems(sid,k)));
+      var pl=CN.plans[sid]=CN.plans[sid]||{},arr=pl[k]=pl[k]||[];
+      if(r.it){if(t)r.it.t=t;else{arr.splice(arr.indexOf(r.it),1);r.it=null}}
+      else if(t){r.it={s:r.s,d:r.d,t:t};arr.push(r.it)}
+      if(!arr.length)delete pl[k];
+      cnSave();
+      if(rowSig(cnRows(cnItems(sid,k)))!==before)cnGrid();
+      else d.classList.toggle('f',!!r.it);
+    };
+    d.appendChild(tm);d.appendChild(inp);box.appendChild(d);
+  });
+}
+function cnDraw(){cnStu();cnGrid()}
+$('sadd').onclick=function(){
+  var n=$('sn').value.trim();if(!n){$('sn').focus();return}
+  var id=Date.now()+''+Math.floor(Math.random()*99);
+  CN.students.push({id:id,name:n});cnSel=id;cnSave();$('sn').value='';cnDraw();
+};
+$('sn').onkeydown=function(e){if(e.key==='Enter')$('sadd').click()};
+$('dnext').onclick=function(){cnDay=addDays(cnDay[0],cnDay[1],cnDay[2],1);cnGrid()};
+$('dprev').onclick=function(){cnDay=addDays(cnDay[0],cnDay[1],cnDay[2],-1);cnGrid()};
+$('zsw').onclick=function(e){var b=e.target.closest('button');if(!b)return;cnSize=+b.dataset.z;[].forEach.call(this.children,function(c){c.classList.toggle('on',c===b)});cnGrid()};
 draw();
 })();
 </script>
