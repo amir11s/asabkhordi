@@ -36,14 +36,15 @@ button{font:inherit;cursor:pointer;border:0;color:inherit;background:none}
 .day h2{font-size:17px;margin:0 2px 8px;display:flex;justify-content:space-between;align-items:baseline}
 .day h2 small{font-weight:400;color:var(--mut);font-size:13px}
 .add{display:grid;gap:8px;margin-bottom:12px}
-input[type=text],input[type=time]{font:inherit;width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--tx)}
+input[type=text],input[type=time],input[type=number]{font:inherit;width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--tx)}
 .row{display:flex;gap:8px}
-.chips{display:flex;gap:6px;flex:1}
-.chip{flex:1;padding:9px 0;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-size:13px;font-weight:600}
-.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.durbox{display:flex;gap:6px;flex:1;min-width:0}
+.durbox input,.durbox select{font:inherit;padding:10px 8px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--tx);min-width:0}
+.durbox input{flex:1;width:100%;text-align:center}
+.durbox select{flex:none}
 .go{background:var(--acc);color:#fff;font-weight:800;padding:11px;border-radius:12px}
 .item{display:flex;gap:10px;align-items:center;background:var(--bg);border-radius:14px;padding:10px 12px;margin-bottom:8px;border-inline-start:5px solid var(--acc)}
-.item.l60{border-color:var(--acc2)}.item.l120{border-color:var(--acc3)}
+.item.m{border-color:var(--acc2)}.item.h{border-color:var(--acc3)}
 .item .t{flex:1;min-width:0}
 .item .t b{display:block;overflow-wrap:anywhere}
 .item .t span{font-size:12.5px;color:var(--mut)}
@@ -70,7 +71,7 @@ input[type=text],input[type=time]{font:inherit;width:100%;padding:10px 12px;bord
 .wi{margin-top:4px;display:grid;gap:4px}
 .wi em{color:var(--mut);font-style:normal;font-size:13px}
 .wc{display:flex;gap:6px;align-items:center;font-size:13px;border-inline-start:4px solid var(--acc);padding:2px 8px;background:var(--card);border-radius:8px}
-.wc.l60{border-color:var(--acc2)}.wc.l120{border-color:var(--acc3)}
+.wc.m{border-color:var(--acc2)}.wc.h{border-color:var(--acc3)}
 .wc.done{color:var(--mut);text-decoration:line-through}
 .wc small{color:var(--mut);flex:none}
 .wc span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -105,9 +106,10 @@ input[type=text],input[type=time]{font:inherit;width:100%;padding:10px 12px;bord
 .dnav small{display:block;font-weight:400;color:var(--mut);font-size:12.5px}
 .sl{display:flex;gap:10px;align-items:center;background:var(--bg);border-radius:14px;padding:8px 10px;margin-bottom:8px;border-inline-start:5px solid var(--line)}
 .sl.f{border-color:var(--acc)}.sl.f.l2{border-color:var(--acc3)}
-.sl .tm{flex:none;width:92px;font-size:12.5px;color:var(--mut);line-height:1.4}
+.sl .tm{flex:none;width:112px;font-size:12.5px;color:var(--mut);line-height:1.4}
 .sl .tm b{display:block;color:var(--tx);font-size:13.5px}
 .sl input{background:var(--card)}
+.sl .x{flex:none}
 </style>
 </head>
 <body>
@@ -115,8 +117,8 @@ input[type=text],input[type=time]{font:inherit;width:100%;padding:10px 12px;bord
 <div id="ovl" hidden></div>
 <nav id="drawer" aria-label="منو">
   <div class="dh">منو</div>
-  <button class="mi on" data-p="home">🗓️ برنامه‌ی من</button>
-  <button class="mi" data-p="cn">🎓 مشاور تحصیلی</button>
+  <button class="mi on" data-p="home">برنامه‌ی من</button>
+  <button class="mi" data-p="cn">مشاور تحصیلی</button>
 </nav>
 <div class="wrap">
 <header>
@@ -148,10 +150,9 @@ input[type=text],input[type=time]{font:inherit;width:100%;padding:10px 12px;bord
     <input type="text" id="ti" placeholder="چه کاری برنامه داری؟" maxlength="80">
     <div class="row">
       <input type="time" id="tm" style="max-width:130px">
-      <div class="chips" id="chips">
-        <button class="chip on" data-m="30">۳۰ دقیقه</button>
-        <button class="chip" data-m="60">۱ ساعت</button>
-        <button class="chip" data-m="120">۲ ساعت</button>
+      <div class="durbox">
+        <input type="number" id="dv" value="30" min="1" step="1" inputmode="numeric" aria-label="مدت">
+        <select id="du" aria-label="واحد"><option value="1">دقیقه</option><option value="60">ساعت</option></select>
       </div>
     </div>
     <button class="go" id="addb">افزودن به برنامه</button>
@@ -176,7 +177,17 @@ input[type=text],input[type=time]{font:inherit;width:100%;padding:10px 12px;bord
       <b id="dtt"></b>
       <button class="nav" id="dprev" aria-label="روز قبل">‹</button>
     </div>
-    <div class="seg" id="zsw"><button data-z="1" class="on">بازه‌ی ۱ ساعته</button><button data-z="2">بازه‌ی ۲ ساعته</button></div>
+    <div class="add">
+      <input type="text" id="at" placeholder="درس یا برنامه" maxlength="120">
+      <div class="row">
+        <input type="time" id="atm" style="max-width:130px">
+        <div class="durbox">
+        <input type="number" id="adv" value="30" min="1" step="1" inputmode="numeric" aria-label="مدت">
+        <select id="adu" aria-label="واحد"><option value="1">دقیقه</option><option value="60">ساعت</option></select>
+      </div>
+      </div>
+      <button class="go" id="aadd">افزودن به برنامه</button>
+    </div>
     <div id="sgrid"></div>
   </div>
 </div>
@@ -195,17 +206,19 @@ var store={};
 try{store=JSON.parse(localStorage.getItem('amirflow')||'{}')}catch(e){}
 function save(){try{localStorage.setItem('amirflow',JSON.stringify(store))}catch(e){}}
 var LN=(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications)||null;
+var CH='amirflow-alerts';
+if(LN&&LN.createChannel)LN.createChannel({id:CH,name:'یادآور برنامه‌ها',description:'شروع و پایان برنامه‌ها',importance:5,visibility:1,vibration:true,lights:true}).catch(function(){});
 var lastN=0;function newNid(){var b=Math.floor(Date.now()/1000)%1000000000;if(b<=lastN)b=lastN+1;lastN=b;return b*2}
 function sched(it,k){
   if(!LN||!it.nid)return;
   var kp=k.split('-'),g=toG(+kp[0],+kp[1],+kp[2]),p=it.start.split(':');
   var st=new Date(g[0],g[1]-1,g[2],+p[0],+p[1]).getTime(),en=st+it.dur*60000,n=Date.now(),a=[];
-  if(st>n)a.push({id:it.nid,title:'شروع شد: '+it.title,body:'مدت: '+fmtDur(it.dur),schedule:{at:new Date(st),allowWhileIdle:true}});
-  if(en>n)a.push({id:it.nid+1,title:'تمام شد: '+it.title,body:'وقت استراحت یا کار بعدی است',schedule:{at:new Date(en),allowWhileIdle:true}});
+  if(st>n)a.push({id:it.nid,title:'شروع شد: '+it.title,body:'مدت: '+fmtDur(it.dur),channelId:CH,smallIcon:'ic_stat',largeIcon:'ic_large',schedule:{at:new Date(st),allowWhileIdle:true}});
+  if(en>n)a.push({id:it.nid+1,title:'تمام شد: '+it.title,body:'وقت استراحت یا کار بعدی است',channelId:CH,smallIcon:'ic_stat',largeIcon:'ic_large',schedule:{at:new Date(en),allowWhileIdle:true}});
   if(a.length)LN.schedule({notifications:a}).catch(function(){});
 }
 function unsched(it){if(LN&&it.nid)LN.cancel({notifications:[{id:it.nid},{id:it.nid+1}]}).catch(function(){})}
-var T=tod(),cy=T[0],cm=T[1],sel=T.slice(),dur=30,view='m',smode='w';
+var T=tod(),cy=T[0],cm=T[1],sel=T.slice(),view='m',smode='w';
 var $=function(i){return document.getElementById(i)};
 var root=document.documentElement;
 function isDark(){var t=root.getAttribute('data-theme');if(t)return t==='dark';return !!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
@@ -217,9 +230,10 @@ function addDays(y,m,d,n){var g=toG(y,m,d),dt=new Date(g[0],g[1]-1,g[2]+n);retur
 function wdOf(y,m,d){var g=toG(y,m,d);return (new Date(g[0],g[1]-1,g[2]).getDay()+1)%7}
 function weekStart(){return addDays(sel[0],sel[1],sel[2],-wdOf(sel[0],sel[1],sel[2]))}
 function sortedAt(k){return (store[k]||[]).slice().sort(function(x,y){return x.start<y.start?-1:1})}
-var now=new Date();$('tm').value=('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2);
+var now=new Date();$('tm').value=$('atm').value=('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2);
 $('wds').innerHTML=WN.map(function(w){return '<div class="wd">'+w.charAt(0)+'</div>'}).join('');
-function fmtDur(m){return m<60?fa(m)+' دقیقه':fa(m/60)+' ساعت'}
+function fmtDur(m){m=Math.round(m);if(m<60)return fa(m)+' دقیقه';var h=Math.floor(m/60),r=m%60;return fa(h)+' ساعت'+(r?' و '+fa(r)+' دقیقه':'')}
+function readDur(v,u){var d=Math.round(parseFloat($(v).value)*(+$(u).value));if(!(d>=1))return 0;return Math.min(d,10080)}
 function endStr(st,m){var p=st.split(':'),t=(+p[0])*60+(+p[1])+m;t%=1440;return ('0'+Math.floor(t/60)).slice(-2)+':'+('0'+t%60).slice(-2)}
 function fmtT(s){return fa(s)}
 function cal(){
@@ -242,7 +256,7 @@ function lst(){
   $('cnt').textContent=a.length?fa(a.length)+' برنامه':'';
   if(!a.length){$('list').innerHTML='<div class="empty">برای این روز هنوز برنامه‌ای نداری. یکی اضافه کن.</div>';return}
   $('list').innerHTML=a.map(function(it){
-    return '<div class="item l'+it.dur+(it.done?' done':'')+'"><button class="ck" data-ck="'+it.id+'">'+(it.done?'✓':'')+'</button><div class="t"><b></b><span>'+fa(it.start)+' تا '+fa(endStr(it.start,it.dur))+' · '+fmtDur(it.dur)+'</span></div><button class="x" data-rm="'+it.id+'" aria-label="حذف">×</button></div>';
+    return '<div class="item '+(it.dur>=60?'h':'m')+(it.done?' done':'')+'"><button class="ck" data-ck="'+it.id+'">'+(it.done?'✓':'')+'</button><div class="t"><b></b><span>'+fa(it.start)+' تا '+fa(endStr(it.start,it.dur))+' · '+fmtDur(it.dur)+'</span></div><button class="x" data-rm="'+it.id+'" aria-label="حذف">×</button></div>';
   }).join('');
   var bs=$('list').querySelectorAll('.item .t b');
   a.forEach(function(it,i){bs[i].textContent=it.title});
@@ -263,7 +277,7 @@ function wk(){
     var w=document.createElement('div');w.className='wi';
     if(!a.length){var em=document.createElement('em');em.textContent='بدون برنامه';w.appendChild(em)}
     a.forEach(function(it){
-      var c=document.createElement('div');c.className='wc l'+it.dur+(it.done?' done':'');
+      var c=document.createElement('div');c.className='wc '+(it.dur>=60?'h':'m')+(it.done?' done':'');
       var sm=document.createElement('small'),t=document.createElement('span');
       sm.textContent=fa(it.start);t.textContent=it.title;c.appendChild(sm);c.appendChild(t);w.appendChild(c);
     });
@@ -311,10 +325,10 @@ $('wlist').onclick=function(e){var r=e.target.closest('.wr');if(!r)return;var d=
 $('prev').onclick=function(){cm--;if(cm<1){cm=12;cy--}cal();stat()};
 $('next').onclick=function(){cm++;if(cm>12){cm=1;cy++}cal();stat()};
 $('days').onclick=function(e){var b=e.target.closest('.d');if(!b)return;sel=[cy,cm,+b.dataset.d];draw()};
-$('chips').onclick=function(e){var b=e.target.closest('.chip');if(!b)return;dur=+b.dataset.m;[].forEach.call(this.children,function(c){c.classList.toggle('on',c===b)})};
 $('addb').onclick=function(){
   var t=$('ti').value.trim();if(!t){$('ti').focus();return}
   var tm=$('tm').value;if(!tm){$('tm').focus();return}
+  var dur=readDur('dv','du');if(!dur){$('dv').focus();return}
   var k=key(sel[0],sel[1],sel[2]);var it={id:Date.now()+''+Math.floor(Math.random()*99),nid:newNid(),title:t,start:tm,dur:dur,done:false,ns:false,ne:false};(store[k]=store[k]||[]).push(it);sched(it,k);
   save();$('ti').value='';draw();askPerm();
 };
@@ -333,7 +347,7 @@ function toast(title,body,end){
 }
 function beep(){try{var C=window.AudioContext||window.webkitAudioContext,c=new C(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.15;o.start();setTimeout(function(){o.stop();c.close()},350)}catch(e){}}
 function notify(title,body,end){
-  try{if('Notification' in window&&Notification.permission==='granted')new Notification(title,{body:body})}catch(e){}
+  try{if('Notification' in window&&Notification.permission==='granted')new Notification(title,{body:body,icon:'logo.png'})}catch(e){}
   toast(title,body,end);beep();
   try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
 }
@@ -354,8 +368,9 @@ function tick(){
 setInterval(tick,10000);tick();
 document.addEventListener('visibilitychange',function(){if(!document.hidden){T=tod();tick();draw()}});
 /* ---- منو و مشاور تحصیلی ---- */
-var CN={students:[],plans:{}},cnSel=null,cnDay=T.slice(),cnSize=1;
+var CN={students:[],plans:{}},cnSel=null,cnDay=T.slice();
 try{var cj=JSON.parse(localStorage.getItem('amirflow-cn')||'null');if(cj&&cj.students&&cj.plans)CN=cj}catch(e){}
+(function(){var ch=false;Object.keys(CN.plans).forEach(function(sid){var pl=CN.plans[sid];Object.keys(pl).forEach(function(k){pl[k].forEach(function(it,i){if(it.start===undefined){it.start=(it.s<10?'0':'')+it.s+':00';it.dur=(it.d||1)*60;it.id=it.id||(Date.now()+''+i);ch=true}})})});if(ch)try{localStorage.setItem('amirflow-cn',JSON.stringify(CN))}catch(e){}})();
 if(CN.students.length)cnSel=CN.students[0].id;
 function cnSave(){try{localStorage.setItem('amirflow-cn',JSON.stringify(CN))}catch(e){}}
 function openMenu(o){$('drawer').classList.toggle('open',o);$('ovl').hidden=!o}
@@ -370,18 +385,6 @@ function showPage(p){
 $('drawer').onclick=function(e){var b=e.target.closest('.mi');if(b)showPage(b.dataset.p)};
 function pad2(n){return (n<10?'0':'')+n}
 function cnItems(sid,k){return ((CN.plans[sid]||{})[k])||[]}
-function cnRows(items){
-  var rows=[],h=8,m={};
-  items.forEach(function(it){m[it.s]=it});
-  while(h<24){
-    if(m[h]){var d=Math.max(1,Math.min(m[h].d,24-h));rows.push({s:h,d:d,it:m[h]});h+=d;continue}
-    var lim=Math.min(cnSize,24-h);
-    for(var x=h+1;x<h+lim;x++){if(m[x]){lim=x-h;break}}
-    rows.push({s:h,d:lim,it:null});h+=lim;
-  }
-  return rows;
-}
-function rowSig(rows){return rows.map(function(r){return r.s+':'+r.d+(r.it?'f':'')}).join(',')}
 function cnStu(){
   var box=$('slist');box.textContent='';
   $('cnc').textContent=CN.students.length?fa(CN.students.length)+' نفر':'';
@@ -410,26 +413,21 @@ function cnGrid(){
   $('dtt').innerHTML='<span></span><small></small>';
   $('dtt').firstChild.textContent=WN[w]+' '+fa(cnDay[2])+' '+MN[cnDay[1]-1];
   $('dtt').lastChild.textContent=fa(cnDay[0])+(isT?' · امروز':'');
-  var k=key(cnDay[0],cnDay[1],cnDay[2]),sid=st.id,rows=cnRows(cnItems(sid,k)),box=$('sgrid');
+  var k=key(cnDay[0],cnDay[1],cnDay[2]),sid=st.id,box=$('sgrid');
+  var arr=cnItems(sid,k).slice().sort(function(x,y){return x.start<y.start?-1:1});
   box.textContent='';
-  rows.forEach(function(r){
-    var d=document.createElement('div');d.className='sl'+(r.it?' f':'')+(r.d>=2?' l2':'');
+  if(!arr.length){var e=document.createElement('div');e.className='empty';e.textContent='برای این روز هنوز برنامه‌ای نیست.';box.appendChild(e);return}
+  arr.forEach(function(it){
+    var d=document.createElement('div');d.className='sl f'+(it.dur>=60?' l2':'');
     var tm=document.createElement('div');tm.className='tm';
-    var b=document.createElement('b');b.textContent=fa(pad2(r.s))+':۰۰ تا '+fa(pad2(r.s+r.d))+':۰۰';
-    var sp=document.createElement('span');sp.textContent=fmtDur(r.d*60);
+    var b=document.createElement('b');b.textContent=fa(it.start)+' تا '+fa(endStr(it.start,it.dur));
+    var sp=document.createElement('span');sp.textContent=fmtDur(it.dur);
     tm.appendChild(b);tm.appendChild(sp);
-    var inp=document.createElement('input');inp.type='text';inp.maxLength=120;inp.placeholder='درس یا برنامه';inp.value=r.it?r.it.t:'';
-    inp.onchange=function(){
-      var t=inp.value.trim(),before=rowSig(cnRows(cnItems(sid,k)));
-      var pl=CN.plans[sid]=CN.plans[sid]||{},arr=pl[k]=pl[k]||[];
-      if(r.it){if(t)r.it.t=t;else{arr.splice(arr.indexOf(r.it),1);r.it=null}}
-      else if(t){r.it={s:r.s,d:r.d,t:t};arr.push(r.it)}
-      if(!arr.length)delete pl[k];
-      cnSave();
-      if(rowSig(cnRows(cnItems(sid,k)))!==before)cnGrid();
-      else d.classList.toggle('f',!!r.it);
-    };
-    d.appendChild(tm);d.appendChild(inp);box.appendChild(d);
+    var inp=document.createElement('input');inp.type='text';inp.maxLength=120;inp.value=it.t;
+    inp.onchange=function(){var t=inp.value.trim();if(t){it.t=t;cnSave()}else inp.value=it.t};
+    var x=document.createElement('button');x.className='x';x.textContent='×';x.setAttribute('aria-label','حذف');
+    x.onclick=function(){var pl=CN.plans[sid],a2=pl[k];a2.splice(a2.indexOf(it),1);if(!a2.length)delete pl[k];cnSave();cnGrid()};
+    d.appendChild(tm);d.appendChild(inp);d.appendChild(x);box.appendChild(d);
   });
 }
 function cnDraw(){cnStu();cnGrid()}
@@ -441,7 +439,16 @@ $('sadd').onclick=function(){
 $('sn').onkeydown=function(e){if(e.key==='Enter')$('sadd').click()};
 $('dnext').onclick=function(){cnDay=addDays(cnDay[0],cnDay[1],cnDay[2],1);cnGrid()};
 $('dprev').onclick=function(){cnDay=addDays(cnDay[0],cnDay[1],cnDay[2],-1);cnGrid()};
-$('zsw').onclick=function(e){var b=e.target.closest('button');if(!b)return;cnSize=+b.dataset.z;[].forEach.call(this.children,function(c){c.classList.toggle('on',c===b)});cnGrid()};
+$('aadd').onclick=function(){
+  var t=$('at').value.trim();if(!t){$('at').focus();return}
+  var tm=$('atm').value;if(!tm){$('atm').focus();return}
+  var dur=readDur('adv','adu');if(!dur){$('adv').focus();return}
+  if(!cnSel)return;
+  var k=key(cnDay[0],cnDay[1],cnDay[2]),pl=CN.plans[cnSel]=CN.plans[cnSel]||{};
+  (pl[k]=pl[k]||[]).push({id:Date.now()+''+Math.floor(Math.random()*99),start:tm,dur:dur,t:t});
+  $('at').value='';cnSave();cnGrid();
+};
+$('at').onkeydown=function(e){if(e.key==='Enter')$('aadd').click()};
 draw();
 })();
 </script>
