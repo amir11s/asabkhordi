@@ -20,6 +20,14 @@ jobs:
         run: |
           npx cap add android
           npx cap sync android
+      - name: Apply app logo and notification icons
+        run: |
+          R=android/app/src/main/res
+          cp -r resources/android/mipmap-* resources/android/drawable $R/
+          rm -f $R/mipmap-*/ic_launcher_foreground.webp $R/mipmap-*/ic_launcher.webp $R/mipmap-*/ic_launcher_round.webp
+          mkdir -p $R/values
+          printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#0B7A75</color>\n</resources>\n' > $R/values/ic_launcher_background.xml
+          ls $R/drawable $R/mipmap-xxhdpi
       - name: Add permissions
         run: |
           M=android/app/src/main/AndroidManifest.xml
